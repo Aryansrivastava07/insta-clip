@@ -1,0 +1,43 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider             = "prisma-client-py"
+  interface            = "sync"
+  recursive_type_depth = 5
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  username        String    @unique
+  password_hash   String
+  ig_session_id   String?
+  gemini_api_key  String?
+  created_at      DateTime  @default(now())
+  reels           Reel[]
+
+  @@map("users")
+}
+
+model Reel {
+  id               Int      @id @default(autoincrement())
+  user_id          Int
+  reel_id          String
+  reel_url         String
+  creator_username String?
+  caption          String?
+  summary          String?
+  transcript       String?
+  on_screen_text   String?
+  tags             String?  // JSON stringified tags list
+  thumbnail_url    String?
+  embedding        String?  // JSON stringified embedding vector
+  created_at       DateTime @default(now())
+
+  user             User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, reel_id])
+  @@map("reels")
+}

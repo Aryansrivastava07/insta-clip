@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  instaclip:
+    build: .
+    container_name: instaclip
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - JWT_SECRET=${JWT_SECRET:-default_insecure_key_change_me}
+      - DATABASE_URL=${DATABASE_URL:-}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>InstaClip - AI Reel Knowledge Base</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="dark-theme">
+  <!-- AUTH MODAL / OVERLAY -->
+  <div id="authOverlay" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="brand-logo">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">InstaClip<span class="ai-badge">AI</span></span>
+        </div>
+        <p class="auth-subtitle">Index & search your curated Instagram Reels with natural language</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabLogin" class="tab-btn active" onclick="switchAuthTab('login')">Sign In</button>
+        <button id="tabRegister" class="tab-btn" onclick="switchAuthTab('register')">Create Account</button>
+      </div>
+
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="input-group">
+          <label for="authUsername">Username</label>
+          <input type="text" id="authUsername" placeholder="Enter your username" required autocomplete="username">
+        </div>
+
+        <div class="input-group">
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••" required autocomplete="current-password">
+        </div>
+
+        <div id="authError" class="auth-error-msg hidden"></div>
+
+        <button type="submit" id="authSubmitBtn" class="btn btn-primary btn-block">
+          <span class="btn-text">Sign In</span>
+          <div class="spinner hidden"></div>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MAIN APP CONTAINER -->
+  <div id="appContainer" class="app-container hidden">
+    <!-- TOP NAVIGATION -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="brand-logo">
+          <span class="logo-icon">🎬</span>
+          <span class="logo-text">InstaClip</span>
+        </div>
+        <div id="igStatusBadge" class="status-pill status-disconnected" onclick="openSettingsModal()">
+          <span class="status-dot"></span>
+          <span class="status-text">IG: Not Connected</span>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <button class="btn btn-secondary btn-sm" onclick="openAddModal()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>Add Reel</span>
+        </button>
+        <button id="syncBtn" class="btn btn-primary btn-sm" onclick="triggerSync()">
+          <svg id="syncIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+          <span id="syncText">Sync Inbox</span>
+        </button>
+        <button class="btn btn-icon" onclick="openSettingsModal()" title="Settings">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="btn btn-icon" onclick="logout()" title="Logout">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- SEARCH & DISCOVERY BAR -->
+    <main class="main-content">
+      <section class="search-section">
+        <div class="search-box">
+          <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" placeholder="Search reels in plain english (e.g. 'tax deductions', 'leg workout', 'productivity app')..." oninput="debounceSearch()">
+          <button id="clearSearchBtn" class="clear-btn hidden" onclick="clearSearch()">✕</button>
+        </div>
+
+        <!-- CATEGORY TAG PILLS -->
+        <div class="tags-scroller" id="tagsContainer">
+          <!-- Loaded dynamically -->
+        </div>
+      </section>
+
+      <!-- RESULTS COUNT & ACTIVE FILTER BAR -->
+      <section class="results-header">
+        <div class="results-count">
+          <span id="reelsCount">0</span> reels indexed
+        </div>
+        <div id="activeFilterBadge" class="filter-pill hidden">
+          <span>Filter: <strong id="filterName"></strong></span>
+          <button onclick="clearTagFilter()">✕</button>
+        </div>
+      </section>
+
+      <!-- REELS GRID -->
+      <div id="reelsGrid" class="reels-grid">
+        <!-- Rendered by app.js -->
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div id="emptyState" class="empty-state hidden">
+        <div class="empty-icon">🔍</div>
+        <h3>No reels found</h3>
+        <p>Sync your dummy Instagram inbox or add a reel manually to start building your search index.</p>
+        <button class="btn btn-primary" onclick="openAddModal()">Add Your First Reel</button>
+      </div>
+    </main>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div id="settingsModal" class="modal-overlay hidden" onclick="closeModalOnBackdrop(event, 'settingsModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Account & Sync Settings</h3>
+        <button class="modal-close-btn" onclick="closeModal('settingsModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="settings-guide">
+          <h4>1. Connect Dummy Instagram Account</h4>
+          <p>Log in to your dummy account on <code>instagram.com</code> in your browser. Open DevTools (F12) → Application → Cookies → copy the <strong>sessionid</strong> cookie value.</p>
+          <div class="input-group">
+            <label for="igSessionInput">Dummy Account sessionid Cookie</label>
+            <input type="password" id="igSessionInput" placeholder="e.g. 6492817293%3AxN9...">
+          </div>
+        </div>
+
+        <div class="settings-guide">
+          <h4>2. Gemini API Key (Multimodal AI)</h4>
+          <p>Enables full video audio transcription, on-screen text reading, and smart summaries. Get a free API key at <a href="https://aistudio.google.com/app/apikey" target="_blank">Google AI Studio</a>.</p>
+          <div class="input-group">
+            <label for="geminiKeyInput">Google Gemini API Key</label>
+            <input type="password" id="geminiKeyInput" placeholder="AIzaSy...">
+          </div>
+        </div>
+
+        <div id="settingsMsg" class="settings-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANUAL ADD REEL MODAL -->
+  <div id="addModal" class="modal-overlay hidden" onclick="closeModalOnBackdrop(event, 'addModal')">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Add Reel by URL</h3>
+        <button class="modal-close-btn" onclick="closeModal('addModal')">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Paste any Instagram Reel link to index its speech, text, and context immediately:</p>
+        <div class="input-group">
+          <label for="manualReelUrl">Instagram Reel URL</label>
+          <input type="text" id="manualReelUrl" placeholder="https://www.instagram.com/reel/C8qXyz.../">
+        </div>
+        <div id="addMsg" class="settings-msg hidden"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('addModal')">Cancel</button>
+        <button id="addReelBtn" class="btn btn-primary" onclick="submitManualReel()">
+          <span class="btn-text">Index Reel</span>
+          <div class="spinner hidden"></div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
